@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+dist/
+.env
+transactions.csv
+backend/models/*.joblib
+backend/models/*.keras
+backend/models/*.pth
+backend/models/*.txt
