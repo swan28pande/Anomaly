@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import os
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from backend.data_generator import generate_transaction_data
 from backend.models.isolation_forest import IsolationForestModel
 from backend.models.autoencoder import AutoencoderModel
@@ -85,6 +86,43 @@ def detect_anomalies(model_type: str = "isolation_forest"):
         "total_records": len(df),
         "anomalies_detected": len(anomalies),
         "anomalies": anomalies.head(100).to_dict(orient="records")
+    }
+
+@app.post("/evaluate")
+def evaluate_model(model_type: str = "isolation_forest"):
+    if not os.path.exists(DATA_FILE):
+        raise HTTPException(status_code=404, detail="Data not found. Generate data first.")
+    
+    df = pd.read_csv(DATA_FILE)
+    
+    # Ground truth
+    y_true = df['is_anomaly'].values
+    
+    if model_type == "isolation_forest":
+        iso_forest.load()
+        if not iso_forest.model:
+             return {"message": "Model not trained. Please train first."}
+        y_pred = iso_forest.predict(df)
+    elif model_type == "autoencoder":
+        autoencoder.load()
+        if not autoencoder.model:
+             return {"message": "Model not trained. Please train first."}
+        y_pred = autoencoder.predict(df)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid model type.")
+    
+    # Calculate metrics
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    recall = recall_score(y_true, y_pred, zero_division=0)
+    f1 = f1_score(y_true, y_pred, zero_division=0)
+    
+    return {
+        "model": model_type,
+        "accuracy": float(accuracy),
+        "precision": float(precision),
+        "recall": float(recall),
+        "f1_score": float(f1)
     }
 
 @app.get("/stats")

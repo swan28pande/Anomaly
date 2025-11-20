@@ -3,6 +3,8 @@
 1. **Project Overview**
    This project demonstrates a real-time anomaly detection system for e-commerce transactions. It uses a FastAPI backend with Machine Learning models (Isolation Forest and Autoencoder) and a React frontend for visualization.
 
+    ![alt text](image.png)
+
 2. **Prerequisites**
    - Python 3.8+
    - Node.js 16+
